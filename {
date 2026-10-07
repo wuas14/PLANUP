@@ -1,0 +1,9 @@
+const CACHE_NAME = "planup-v1";
+const STATIC_ASSETS = [
+  "/",
+  "/dashboard",
+  "/offline",
+  "/manifest.json",
+];
+
+self.addEventListener("install", (event
