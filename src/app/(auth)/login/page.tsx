@@ -1,91 +1,84 @@
 "use client";
+
 import { useState } from "react";
+import { auth } from "@/lib/firebase/config";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/lib/hooks/useAuth";
-import Button from "@/components/ui/Button";
 
 export default function LoginPage() {
-  const { login } = useAuth();
-  const router = useRouter();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setError("");
     try {
-      await login(form.email, form.password);
+      await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err: any) {
-      setError("Email ou mot de passe incorrect");
+      setError("Identifiants incorrects. Veuillez réessayer.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-950">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl">
         <div className="text-center mb-8">
-          <h1 className="text-5xl font-black text-indigo-500">
-            Plan<span className="text-white">Up</span>
-          </h1>
-          <p className="text-slate-400 mt-2 text-sm">Organisez votre journee en toute serenite</p>
+          <h1 className="text-3xl font-extrabold text-indigo-500 mb-2">PlanUp</h1>
+          <p className="text-slate-400 text-sm">Organisez votre journée en toute sérénité</p>
         </div>
+        
+        {error && (
+          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg text-center">
+            {error}
+          </div>
+        )}
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
-          <h2 className="text-xl font-bold mb-6 text-white">Connexion</h2>
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              placeholder="nom@exemple.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">Mot de passe</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              placeholder="••••••••"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 rounded-xl transition-all mt-2 disabled:opacity-50 cursor-pointer"
+          >
+            {loading ? "Connexion en cours..." : "Se connecter"}
+          </button>
+        </form>
 
-          {error && (
-            <div className="bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-xl px-4 py-3 text-sm mb-4">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                Email
-              </label>
-              <input
-                type="email"
-                required
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="nom@exemple.com"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                Mot de passe
-              </label>
-              <input
-                type="password"
-                required
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="••••••••"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-              />
-            </div>
-
-            <Button type="submit" loading={loading} className="w-full mt-2" size="lg">
-              Se connecter
-            </Button>
-          </form>
-
-          <p className="text-center text-slate-400 text-sm mt-6">
-            Nouveau sur PlanUp ?{" "}
-            <Link href="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold">
-              Creer un compte
-            </Link>
-          </p>
-        </div>
+        <p className="text-center text-slate-400 text-sm mt-8">
+          Nouveau sur PlanUp ?{" "}
+          <Link href="/register" className="text-indigo-400 hover:text-indigo-300 font-medium">
+            Créer un compte
+          </Link>
+        </p>
       </div>
     </div>
   );
