@@ -67,65 +67,63 @@ export default function TasksPage() {
   });
 
   return (
-    <div className="space-y-6 w-full max-w-full overflow-hidden">
-      {/* En-tete et Boutons de Filtres */}
-      <div className="flex flex-col gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-white">Toutes mes tâches</h1>
-          <p className="text-slate-400 text-xs mt-0.5">Gérez et observez votre avancement</p>
-        </div>
+    <div className="space-y-6 w-full">
+      {/* En-tete */}
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Toutes mes tâches</h1>
+        <p className="text-slate-400 text-xs sm:text-sm mt-1">Gérez et suivez votre avancement</p>
+      </div>
 
-        {/* Barre de filtres scrollable sans chevauchement */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 w-full border-b border-slate-800">
-          <button
-            onClick={() => setFilter("all")}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-              filter === "all" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
-            }`}
-          >
-            Toutes ({tasks.length})
-          </button>
-          <button
-            onClick={() => setFilter("pending")}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-              filter === "pending" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
-            }`}
-          >
-            En attente ({tasks.filter((t) => t.status === "pending").length})
-          </button>
-          <button
-            onClick={() => setFilter("done")}
-            className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-              filter === "done" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
-            }`}
-          >
-            Terminées ({tasks.filter((t) => t.status === "done").length})
-          </button>
-        </div>
+      {/* Onglets de Filtres */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 w-full">
+        <button
+          onClick={() => setFilter("all")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+            filter === "all" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
+          }`}
+        >
+          Toutes ({tasks.length})
+        </button>
+        <button
+          onClick={() => setFilter("pending")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+            filter === "pending" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
+          }`}
+        >
+          En attente ({tasks.filter((t) => t.status === "pending").length})
+        </button>
+        <button
+          onClick={() => setFilter("done")}
+          className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+            filter === "done" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
+          }`}
+        >
+          Terminées ({tasks.filter((t) => t.status === "done").length})
+        </button>
       </div>
 
       {/* Liste des Taches */}
       <div className="space-y-3">
         {loading ? (
-          <div className="text-center py-10 text-slate-500 text-sm">Chargement de vos tâches...</div>
+          <div className="text-center py-10 text-slate-500 text-sm">Chargement...</div>
         ) : filteredTasks.length === 0 ? (
           <div className="text-center py-12 bg-slate-900/50 border border-dashed border-slate-800 rounded-3xl p-6">
-            <p className="text-slate-400 font-medium text-sm">Aucune tâche trouvée dans cette catégorie.</p>
+            <p className="text-slate-400 font-medium text-sm">Aucune tâche dans cette catégorie.</p>
           </div>
         ) : (
           filteredTasks.map((task) => (
             <div
               key={task.id}
-              className={`p-4 rounded-2xl border transition-all flex items-start justify-between gap-3 ${
+              className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
                 task.status === "done"
                   ? "bg-slate-950/40 border-slate-800/60 opacity-60"
                   : "bg-slate-900 border-slate-800"
               }`}
             >
-              <div className="flex items-start gap-3 overflow-hidden min-w-0 flex-1">
+              <div className="flex items-center gap-3 overflow-hidden min-w-0 flex-1">
                 <button
                   onClick={() => toggleTaskStatus(task)}
-                  className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-colors cursor-pointer shrink-0 mt-0.5 ${
+                  className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
                     task.status === "done"
                       ? "bg-emerald-500 border-emerald-500 text-white"
                       : "border-slate-600 hover:border-indigo-500"
@@ -138,40 +136,34 @@ export default function TasksPage() {
                   )}
                 </button>
                 <div className="min-w-0 flex-1">
-                  <p className={`font-semibold text-sm text-white break-words ${task.status === "done" ? "line-through text-slate-400" : ""}`}>
+                  <p className={`font-semibold text-sm text-white truncate ${task.status === "done" ? "line-through text-slate-400" : ""}`}>
                     {task.title}
                   </p>
-                  {task.description && (
-                    <p className="text-xs text-slate-400 mt-1 break-words line-clamp-2">{task.description}</p>
-                  )}
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[11px] text-slate-400 font-medium bg-slate-800 px-2 py-0.5 rounded-md border border-slate-700/50">
-                      📅 {task.dueDate}
-                    </span>
-                    <span
-                      className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md ${
-                        task.priority === "high"
-                          ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                          : task.priority === "medium"
-                          ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                          : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                      }`}
-                    >
-                      {task.priority}
-                    </span>
-                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5">📅 {task.dueDate}</p>
                 </div>
               </div>
 
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="p-2 text-slate-500 hover:text-red-400 rounded-xl hover:bg-red-500/10 transition-colors shrink-0 cursor-pointer"
-                title="Supprimer la tâche"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <span
+                  className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md ${
+                    task.priority === "high"
+                      ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                      : task.priority === "medium"
+                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                  }`}
+                >
+                  {task.priority}
+                </span>
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
             </div>
           ))
         )}

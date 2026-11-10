@@ -62,8 +62,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-slate-950 text-white relative">
-      {/* Barre superieure Mobile (En-tete avec bouton Hamburger) */}
-      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 z-30 flex items-center justify-between px-4">
+      {/* Barre superieure Mobile */}
+      <header className="md:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 z-40 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-base">P</div>
           <span className="text-lg font-bold text-white tracking-wide">PlanUp</span>
@@ -71,7 +71,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <button
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
           className="p-2 text-slate-300 hover:text-white bg-slate-800 rounded-xl cursor-pointer"
-          aria-label="Menu Hamburger"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {isSidebarOpen ? (
@@ -83,7 +82,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </button>
       </header>
 
-      {/* Fond floute lorsqu'on ouvre le menu sur Mobile */}
+      {/* Fond floute lorsqu'on ouvre le menu */}
       {isSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden transition-all duration-300"
@@ -91,7 +90,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         />
       )}
 
-      {/* Barre Laterale (Sidebar Drawer) */}
+      {/* Barre Laterale */}
       <aside
         className={`fixed top-0 bottom-0 left-0 w-[260px] bg-slate-900 border-r border-slate-800 z-50 flex flex-col transition-transform duration-300 ease-in-out ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
@@ -133,7 +132,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        {/* Profil Utilisateur & Deconnexion */}
         <div className="p-4 border-t border-slate-800 bg-slate-900/50">
           {user && (
             <div className="mb-3 px-3 py-2 rounded-xl bg-slate-800/60 flex items-center gap-3 overflow-hidden">
@@ -158,9 +156,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      {/* Zone de contenu principale (Affiche toute la largeur sur mobile) */}
-      <main className="pt-20 md:pt-0 md:pl-[260px] min-h-screen w-full transition-all duration-300">
-        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+      {/* Contenu principal avec grande marge en haut sur mobile (pt-24 = 96px) */}
+      <main className="pt-24 md:pt-8 md:pl-[260px] min-h-screen w-full transition-all duration-300 px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="max-w-7xl mx-auto w-full">
           {children}
         </div>
       </main>

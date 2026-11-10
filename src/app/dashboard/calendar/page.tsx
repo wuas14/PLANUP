@@ -41,15 +41,15 @@ export default function CalendarPage() {
     <div className="space-y-6 w-full">
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Calendrier</h1>
-        <p className="text-slate-400 text-sm mt-1">Aperçu de votre emploi du temps</p>
+        <p className="text-slate-400 text-xs sm:text-sm mt-1">Aperçu de vos échéances</p>
       </div>
 
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
         {loading ? (
-          <div className="text-center py-8 text-slate-500">Chargement du calendrier...</div>
+          <div className="text-center py-8 text-slate-500 text-sm">Chargement du calendrier...</div>
         ) : tasks.length === 0 ? (
           <div className="text-center py-10 border border-dashed border-slate-800 rounded-2xl">
-            <p className="text-slate-400 font-medium">Aucune tâche enregistrée dans le calendrier.</p>
+            <p className="text-slate-400 font-medium text-sm">Aucune tâche enregistrée dans le calendrier.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
