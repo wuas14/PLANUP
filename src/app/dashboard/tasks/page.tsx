@@ -67,43 +67,70 @@ export default function TasksPage() {
   });
 
   return (
-    <div className="space-y-6 w-full pt-2">
+    <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
       {/* Titre */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Toutes mes tâches</h1>
         <p className="text-slate-400 text-xs sm:text-sm mt-1">Gérez et suivez vos activités</p>
       </div>
 
-      {/* Filtres bien espacés */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 w-full">
+      {/* Filtres avec espace FORCE en Flex CSS */}
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", overflowX: "auto", paddingBottom: "8px", width: "100%" }}>
         <button
           onClick={() => setFilter("all")}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-            filter === "all" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
-          }`}
+          style={{
+            padding: "8px 16px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            fontWeight: "600",
+            whiteSpace: "nowrap",
+            cursor: "pointer",
+            flexShrink: 0,
+            backgroundColor: filter === "all" ? "#4f46e5" : "#0f172a",
+            color: filter === "all" ? "#ffffff" : "#94a3b8",
+            border: filter === "all" ? "none" : "1px solid #1e293b",
+          }}
         >
           Toutes ({tasks.length})
         </button>
         <button
           onClick={() => setFilter("pending")}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-            filter === "pending" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
-          }`}
+          style={{
+            padding: "8px 16px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            fontWeight: "600",
+            whiteSpace: "nowrap",
+            cursor: "pointer",
+            flexShrink: 0,
+            backgroundColor: filter === "pending" ? "#4f46e5" : "#0f172a",
+            color: filter === "pending" ? "#ffffff" : "#94a3b8",
+            border: filter === "pending" ? "none" : "1px solid #1e293b",
+          }}
         >
           En attente ({tasks.filter((t) => t.status === "pending").length})
         </button>
         <button
           onClick={() => setFilter("done")}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
-            filter === "done" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
-          }`}
+          style={{
+            padding: "8px 16px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            fontWeight: "600",
+            whiteSpace: "nowrap",
+            cursor: "pointer",
+            flexShrink: 0,
+            backgroundColor: filter === "done" ? "#4f46e5" : "#0f172a",
+            color: filter === "done" ? "#ffffff" : "#94a3b8",
+            border: filter === "done" ? "none" : "1px solid #1e293b",
+          }}
         >
           Terminées ({tasks.filter((t) => t.status === "done").length})
         </button>
       </div>
 
-      {/* Cartes de taches */}
-      <div className="space-y-3">
+      {/* Liste des taches FORCEE en CSS */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%" }}>
         {loading ? (
           <div className="text-center py-10 text-slate-500 text-sm">Chargement...</div>
         ) : filteredTasks.length === 0 ? (
@@ -114,13 +141,19 @@ export default function TasksPage() {
           filteredTasks.map((task) => (
             <div
               key={task.id}
-              className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
-                task.status === "done"
-                  ? "bg-slate-950/40 border-slate-800/60 opacity-60"
-                  : "bg-slate-900 border-slate-800"
-              }`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "16px",
+                borderRadius: "16px",
+                backgroundColor: task.status === "done" ? "rgba(2, 6, 23, 0.4)" : "#0f172a",
+                border: "1px solid #1e293b",
+                gap: "12px",
+                width: "100%",
+              }}
             >
-              <div className="flex items-center gap-3 overflow-hidden min-w-0 flex-1">
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minWidth: 0 }}>
                 <button
                   onClick={() => toggleTaskStatus(task)}
                   className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
@@ -135,7 +168,7 @@ export default function TasksPage() {
                     </svg>
                   )}
                 </button>
-                <div className="min-w-0 flex-1">
+                <div style={{ minWidth: 0, flex: 1 }}>
                   <p className={`font-semibold text-sm text-white truncate ${task.status === "done" ? "line-through text-slate-400" : ""}`}>
                     {task.title}
                   </p>
@@ -143,7 +176,7 @@ export default function TasksPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
                 <span
                   className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md ${
                     task.priority === "high"
