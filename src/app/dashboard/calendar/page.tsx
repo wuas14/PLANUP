@@ -1,119 +1,74 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/hooks/useAuth";
-import { useTasks } from "@/lib/hooks/useTasks";
-import Calendar from "@/components/calendar/Calendar";
-import TaskList from "@/components/tasks/TaskList";
-import TaskForm from "@/components/tasks/TaskForm";
-import Modal from "@/components/ui/Modal";
-import Button from "@/components/ui/Button";
-import Sidebar from "@/components/Sidebar";
-import OfflineBanner from "@/components/OfflineBanner";
+import { auth, db } from "@/lib/firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+
+interface Task {
+  id: string;
+  title: string;
+  dueDate: string;
+  status: "pending" | "done" | "rescheduled";
+  priority: "low" | "medium" | "high";
+}
 
 export default function CalendarPage() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [showNewTask, setShowNewTask] = useState(false);
-
-  const {
-    tasks,
-    loading,
-    createTask,
-    editTask,
-    completeTask,
-    postponeTask,
-    removeTask,
-  } = useTasks(user?.uid || null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) router.push("/login");
-  }, [user, authLoading, router]);
-
-  const selectedDateTasks = selectedDate
-    ? tasks.filter((t) => {
-        const d = t.startTime.toDate();
-        return (
-          d.getDate() === selectedDate.getDate() &&
-          d.getMonth() === selectedDate.getMonth() &&
-          d.getFullYear() === selectedDate.getFullYear()
-        );
-      })
-    : [];
-
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        const q = query(collection(db, "tasks"), where("userId", "==", currentUser.uid));
+        const unsubscribeTasks = onSnapshot(q, (snapshot) => {
+          const fetchedTasks: Task[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as Task[];
+          setTasks(fetchedTasks);
+          setLoading(false);
+        });
+        return () => unsubscribeTasks();
+      } else {
+        setLoading(false);
+      }
+    });
+    return () => unsubscribeAuth();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <Sidebar />
-      <OfflineBanner />
+    <div className="space-y-6 w-full">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Calendrier</h1>
+        <p className="text-slate-400 text-sm mt-1">Aperçu de votre emploi du temps</p>
+      </div>
 
-      <main
-        style={{
-          marginLeft: "260px",
-          width: "calc(100% - 260px)",
-          padding: "2rem",
-          minHeight: "100vh",
-          boxSizing: "border-box",
-        }}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-black">Calendrier et Planning</h1>
-          <Button onClick={() => setShowNewTask(true)}>+ Nouvelle tache</Button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Calendar
-              tasks={tasks}
-              selectedDate={selectedDate}
-              onSelectDate={(date) => setSelectedDate(date)}
-            />
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+        {loading ? (
+          <div className="text-center py-8 text-slate-500">Chargement du calendrier...</div>
+        ) : tasks.length === 0 ? (
+          <div className="text-center py-10 border border-dashed border-slate-800 rounded-2xl">
+            <p className="text-slate-400 font-medium">Aucune tâche enregistrée dans le calendrier.</p>
           </div>
-
-          <div>
-            <h2 className="text-lg font-bold mb-3 text-slate-200">
-              {selectedDate
-                ? selectedDate.toLocaleDateString("fr-FR", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "long",
-                  })
-                : "Selectionnez un jour"}
-            </h2>
-
-            <TaskList
-              tasks={selectedDateTasks}
-              onComplete={completeTask}
-              onReschedule={postponeTask}
-              onDelete={removeTask}
-              onEdit={editTask}
-              emptyMessage="Aucune tache prevue pour cette journee."
-            />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {tasks.map((task) => (
+              <div key={task.id} className="bg-slate-800/60 border border-slate-700/60 p-4 rounded-2xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-indigo-400">📅 {task.dueDate}</span>
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
+                    task.status === "done" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
+                  }`}>
+                    {task.status === "done" ? "Terminée" : "En cours"}
+                  </span>
+                </div>
+                <p className="font-semibold text-white text-sm truncate">{task.title}</p>
+              </div>
+            ))}
           </div>
-        </div>
-
-        <Modal
-          isOpen={showNewTask}
-          onClose={() => setShowNewTask(false)}
-          title="Ajouter une tache"
-        >
-          <TaskForm
-            onSubmit={async (data) => {
-              await createTask(data);
-              setShowNewTask(false);
-            }}
-            onCancel={() => setShowNewTask(false)}
-          />
-        </Modal>
-      </main>
+        )}
+      </div>
     </div>
   );
 }

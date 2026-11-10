@@ -1,157 +1,146 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/hooks/useAuth";
-import { useTasks } from "@/lib/hooks/useTasks";
-import { notificationScheduler } from "@/lib/notifications/scheduler";
-import TaskList from "@/components/tasks/TaskList";
-import TaskForm from "@/components/tasks/TaskForm";
-import Modal from "@/components/ui/Modal";
-import Button from "@/components/ui/Button";
-import Sidebar from "@/components/Sidebar";
-import OfflineBanner from "@/components/OfflineBanner";
+import { auth, db } from "@/lib/firebase/config";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 
-export default function DashboardPage() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
-  const [showNewTask, setShowNewTask] = useState(false);
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  dueDate: string;
+  status: "pending" | "done" | "rescheduled";
+  priority: "low" | "medium" | "high";
+  userId: string;
+}
 
-  const {
-    todayTasks,
-    pendingTasks,
-    doneTasks,
-    loading,
-    createTask,
-    editTask,
-    completeTask,
-    postponeTask,
-    removeTask,
-  } = useTasks(user?.uid || null);
+export default function TasksPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [filter, setFilter] = useState<"all" | "pending" | "done">("all");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, authLoading, router]);
-
-  useEffect(() => {
-    notificationScheduler.requestPermission();
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const q = query(collection(db, "tasks"), where("userId", "==", currentUser.uid));
+        const unsubscribeTasks = onSnapshot(q, (snapshot) => {
+          const fetchedTasks: Task[] = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as Task[];
+          setTasks(fetchedTasks);
+          setLoading(false);
+        });
+        return () => unsubscribeTasks();
+      } else {
+        setLoading(false);
+      }
+    });
+    return () => unsubscribeAuth();
   }, []);
 
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-950">
-        <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const toggleTaskStatus = async (task: Task) => {
+    try {
+      const taskRef = doc(db, "tasks", task.id);
+      const newStatus = task.status === "done" ? "pending" : "done";
+      await updateDoc(taskRef, { status: newStatus });
+    } catch (err) {
+      console.error("Erreur:", err);
+    }
+  };
 
-  if (!user) return null;
+  const deleteTask = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "tasks", id));
+    } catch (err) {
+      console.error("Erreur:", err);
+    }
+  };
 
-  const now = new Date();
-  const greeting =
-    now.getHours() < 12
-      ? "Bonjour"
-      : now.getHours() < 18
-      ? "Bon apres-midi"
-      : "Bonsoir";
+  const filteredTasks = tasks.filter((t) => {
+    if (filter === "pending") return t.status === "pending";
+    if (filter === "done") return t.status === "done";
+    return true;
+  });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <Sidebar />
-      <OfflineBanner />
-
-      <main
-        style={{
-          marginLeft: "260px",
-          width: "calc(100% - 260px)",
-          padding: "2rem",
-          minHeight: "100vh",
-          boxSizing: "border-box",
-        }}
-      >
-        {/* En-tete */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-black text-white">
-              {greeting}, {user.displayName?.split(" ")[0] || "utilisateur"} 👋
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              {new Date().toLocaleDateString("fr-FR", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </p>
-          </div>
-          <Button onClick={() => setShowNewTask(true)} size="md">
-            + Nouvelle tache
-          </Button>
-        </div>
-
-        {/* Statistiques */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center shadow-lg">
-            <div className="text-3xl mb-1">📅</div>
-            <div className="text-3xl font-black text-white">{todayTasks.length}</div>
-            <div className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">
-              Aujourd'hui
-            </div>
-          </div>
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center shadow-lg">
-            <div className="text-3xl mb-1">⏳</div>
-            <div className="text-3xl font-black text-amber-400">
-              {pendingTasks.length}
-            </div>
-            <div className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">
-              En attente
-            </div>
-          </div>
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 text-center shadow-lg">
-            <div className="text-3xl mb-1">✅</div>
-            <div className="text-3xl font-black text-emerald-400">
-              {doneTasks.length}
-            </div>
-            <div className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">
-              Terminees
-            </div>
-          </div>
-        </div>
-
-        {/* Taches */}
+    <div className="space-y-6 w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <span>📅</span> Taches du jour
-            <span className="text-xs font-semibold bg-indigo-500/20 text-indigo-400 px-2.5 py-0.5 rounded-full">
-              {todayTasks.length}
-            </span>
-          </h2>
-          <TaskList
-            tasks={todayTasks}
-            onComplete={completeTask}
-            onReschedule={postponeTask}
-            onDelete={removeTask}
-            onEdit={editTask}
-            emptyMessage="Aucune tache prevue aujourd'hui. Profitez de votre journee !"
-          />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Toutes mes tâches</h1>
+          <p className="text-slate-400 text-sm mt-1">Gérez et filtrez votre liste de travail</p>
         </div>
 
-        {/* Modal nouvelle tache */}
-        <Modal
-          isOpen={showNewTask}
-          onClose={() => setShowNewTask(false)}
-          title="Ajouter une nouvelle tache"
-        >
-          <TaskForm
-            onSubmit={async (data) => {
-              await createTask(data);
-              setShowNewTask(false);
-            }}
-            onCancel={() => setShowNewTask(false)}
-          />
-        </Modal>
-      </main>
+        <div className="flex bg-slate-900 border border-slate-800 p-1.5 rounded-2xl self-start sm:self-auto">
+          {(["all", "pending", "done"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded-xl text-xs font-semibold capitalize transition-all cursor-pointer ${
+                filter === f ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-white"
+              }`}
+            >
+              {f === "all" ? "Toutes" : f === "pending" ? "En attente" : "Terminées"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+        {loading ? (
+          <div className="text-center py-8 text-slate-500">Chargement...</div>
+        ) : filteredTasks.length === 0 ? (
+          <div className="text-center py-10 border border-dashed border-slate-800 rounded-2xl">
+            <p className="text-slate-400 font-medium">Aucune tâche trouvée pour ce filtre.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredTasks.map((task) => (
+              <div
+                key={task.id}
+                className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                  task.status === "done" ? "bg-slate-950/40 border-slate-800/60 opacity-60" : "bg-slate-800/60 border-slate-700/60"
+                }`}
+              >
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <button
+                    onClick={() => toggleTaskStatus(task)}
+                    className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
+                      task.status === "done" ? "bg-emerald-500 border-emerald-500 text-white" : "border-slate-600 hover:border-indigo-500"
+                    }`}
+                  >
+                    {task.status === "done" && (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </button>
+                  <div className="overflow-hidden">
+                    <p className={`font-semibold text-sm text-white truncate ${task.status === "done" ? "line-through text-slate-400" : ""}`}>
+                      {task.title}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">📅 {task.dueDate}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-[10px] font-bold uppercase px-2 py-1 rounded-md ${
+                    task.priority === "high" ? "bg-red-500/10 text-red-400 border border-red-500/20" : task.priority === "medium" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                  }`}>
+                    {task.priority}
+                  </span>
+                  <button onClick={() => deleteTask(task.id)} className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
