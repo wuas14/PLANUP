@@ -67,18 +67,18 @@ export default function TasksPage() {
   });
 
   return (
-    <div className="space-y-6 w-full">
-      {/* En-tete */}
+    <div className="space-y-6 w-full pt-2">
+      {/* Titre */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Toutes mes tâches</h1>
-        <p className="text-slate-400 text-xs sm:text-sm mt-1">Gérez et suivez votre avancement</p>
+        <p className="text-slate-400 text-xs sm:text-sm mt-1">Gérez et suivez vos activités</p>
       </div>
 
-      {/* Onglets de Filtres */}
+      {/* Filtres bien espacés */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 w-full">
         <button
           onClick={() => setFilter("all")}
-          className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
             filter === "all" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
           }`}
         >
@@ -86,7 +86,7 @@ export default function TasksPage() {
         </button>
         <button
           onClick={() => setFilter("pending")}
-          className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
             filter === "pending" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
           }`}
         >
@@ -94,7 +94,7 @@ export default function TasksPage() {
         </button>
         <button
           onClick={() => setFilter("done")}
-          className={`px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer shrink-0 ${
             filter === "done" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30" : "bg-slate-900 text-slate-400 border border-slate-800 hover:text-white"
           }`}
         >
@@ -102,7 +102,7 @@ export default function TasksPage() {
         </button>
       </div>
 
-      {/* Liste des Taches */}
+      {/* Cartes de taches */}
       <div className="space-y-3">
         {loading ? (
           <div className="text-center py-10 text-slate-500 text-sm">Chargement...</div>
@@ -157,7 +157,7 @@ export default function TasksPage() {
                 </span>
                 <button
                   onClick={() => deleteTask(task.id)}
-                  className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors"
+                  className="p-1.5 text-slate-500 hover:text-red-400 rounded-lg hover:bg-red-500/10 transition-colors cursor-pointer"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
