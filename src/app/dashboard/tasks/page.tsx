@@ -68,13 +68,11 @@ export default function TasksPage() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
-      {/* Titre */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Toutes mes tâches</h1>
-        <p className="text-slate-400 text-xs sm:text-sm mt-1">Gérez et suivez vos activités</p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white">Toutes mes taches</h1>
+        <p className="text-slate-400 text-xs sm:text-sm mt-1">Gerez et suivez vos activites</p>
       </div>
 
-      {/* Filtres avec espace FORCE en Flex CSS */}
       <div style={{ display: "flex", alignItems: "center", gap: "10px", overflowX: "auto", paddingBottom: "8px", width: "100%" }}>
         <button
           onClick={() => setFilter("all")}
@@ -125,17 +123,16 @@ export default function TasksPage() {
             border: filter === "done" ? "none" : "1px solid #1e293b",
           }}
         >
-          Terminées ({tasks.filter((t) => t.status === "done").length})
+          Terminees ({tasks.filter((t) => t.status === "done").length})
         </button>
       </div>
 
-      {/* Liste des taches FORCEE en CSS */}
       <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%" }}>
         {loading ? (
           <div className="text-center py-10 text-slate-500 text-sm">Chargement...</div>
         ) : filteredTasks.length === 0 ? (
           <div className="text-center py-12 bg-slate-900/50 border border-dashed border-slate-800 rounded-3xl p-6">
-            <p className="text-slate-400 font-medium text-sm">Aucune tâche dans cette catégorie.</p>
+            <p className="text-slate-400 font-medium text-sm">Aucune tache dans cette categorie.</p>
           </div>
         ) : (
           filteredTasks.map((task) => (
@@ -172,7 +169,7 @@ export default function TasksPage() {
                   <p className={`font-semibold text-sm text-white truncate ${task.status === "done" ? "line-through text-slate-400" : ""}`}>
                     {task.title}
                   </p>
-                  <p className="text-xs text-slate-400 mt-0.5">📅 {task.dueDate}</p>
+                  <p className="text-xs text-slate-400 mt-0.5">{task.dueDate}</p>
                 </div>
               </div>
 
