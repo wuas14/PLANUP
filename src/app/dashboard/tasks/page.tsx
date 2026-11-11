@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { auth, db } from "@/lib/firebase/config";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { collection, query, where, onSnapshot, doc, updateDoc, deleteDoc } from "firebase/firestore";
 
 interface Task {
@@ -16,20 +16,18 @@ interface Task {
 }
 
 export default function TasksPage() {
-  const [user, setUser] = useState<User | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState<"all" | "pending" | "done">("all");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
       if (currentUser) {
         const q = query(collection(db, "tasks"), where("userId", "==", currentUser.uid));
         const unsubscribeTasks = onSnapshot(q, (snapshot) => {
-          const fetchedTasks: Task[] = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
+          const fetchedTasks: Task[] = snapshot.docs.map((docItem) => ({
+            id: docItem.id,
+            ...docItem.data(),
           })) as Task[];
           setTasks(fetchedTasks);
           setLoading(false);
